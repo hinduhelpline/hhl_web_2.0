@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { name: "Admins", href: "/dashboard/admins" },
-    { name: "Prayag Kumbh", href: "/dashboard/prayag" },
+    { name: "Help List", href: "/dashboard/help" },
   ];
 
   return (  
@@ -21,9 +21,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link
               key={item.name}
               href={item.href}
-              className={`block px-4 py-2 rounded hover:bg-gray-700 ${
-                pathname === item.href ? "bg-gray-700" : ""
-              }`}
+              className={`block px-4 py-2 rounded transition-colors duration-200 ${
+                pathname === item.href
+                  ? "bg-gray-100 font-semibold text-[#f68738]" // active item: light bg + bold + orange text
+                  : "hover:bg-gray-100"
+              }`}              
             >
               {item.name}
             </Link>
@@ -34,9 +36,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content with header */}
       <div className="ml-64 flex-1 flex flex-col">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-6 shadow-sm sticky top-0 z-10">
-          <h1 className="text-lg font-semibold">Dashboard header</h1>
-        </header>
+        <header className="h-16 bg-[#f68738] border-b border-gray-200 flex items-center px-6 shadow-sm sticky top-0 z-10">
+  <h1 className="text-lg font-semibold text-white">Dashboard header</h1>
+</header>
+
 
         {/* Page content */}
         <main className="flex-1 p-6 overflow-y-auto">{children}</main>
