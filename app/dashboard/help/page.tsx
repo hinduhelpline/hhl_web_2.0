@@ -45,16 +45,36 @@ export default function HelpPage() {
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {helpList.map((item: any) => (
-          <div
-            key={item._id}
-            className="p-4 bg-white rounded-lg shadow border border-gray-200"
-          >
-            <h2 className="text-lg font-semibold mb-1">{item.title || "No Title"}</h2>
-            <p className="text-sm text-gray-700">{item.description || "No description"}</p>
-            {/* Add more fields as per API response */}
-          </div>
-        ))}
+        {helpList.map((item: any) => {
+          console.log(item, `sdvsv`);
+          return <div
+          key={item._id}
+          className="p-4 bg-white rounded-lg shadow border border-gray-200 space-y-1 text-sm"
+        >
+          <p><span className="font-semibold">Full Name:</span> {item.fullName || "N/A"}</p>
+          <p><span className="font-semibold">Mobile:</span> {item.mobile || "N/A"}</p>
+          <p><span className="font-semibold">Date:</span> {new Date(item.createdAt).toLocaleString()}</p>
+          <p><span className="font-semibold">Address:</span> {item.address || "N/A"}</p>
+          <p><span className="font-semibold">Pin Code:</span> {item.pincode || "N/A"}</p>
+          <p><span className="font-semibold">State:</span> {item.state?.name || "N/A"}</p>
+          <p><span className="font-semibold">District:</span> {item.district?.name || "N/A"}</p>
+          <p><span className="font-semibold">Block/Taluka:</span> {item.block?.name || "N/A"}</p>
+          <p><span className="font-semibold">Type of Help:</span> {item.helpCategory || "N/A"}</p>
+          <p><span className="font-semibold">Help Detail:</span> {item.helpSubCategory || "N/A"}</p>
+          <p><span className="font-semibold">Mode:</span> {item.helpMode || "N/A"}</p>
+          <p><span className="font-semibold">Description:</span> {item.description || "N/A"}</p>
+          <div className="pt-2 flex justify-end">
+    <button
+      className="px-4 py-1 bg-[#f68738] text-white rounded hover:bg-[#e47520] transition"
+      onClick={() => console.log("Review clicked for:", item._id)}
+    >
+      Help Review
+    </button>
+  </div>
+
+        </div>
+        
+})}
       </div>
     </main>
   );
