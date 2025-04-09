@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Admin = {
   id: number;
@@ -11,7 +11,10 @@ type Admin = {
 };
 
 export default function AdminsPage() {
-  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [error, setError] = useState("");
@@ -30,37 +33,89 @@ export default function AdminsPage() {
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch admins
-        const adminRes = await fetch("https://api.hinduhelpline.in/api/v1/admin", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiI5NTg2Nzg0OTg5IiwiYWRtaW5JZCI6IjY3NzYxNjZjNTUxY2U4ODU1MWNlZDY0YyIsImlhdCI6MTc0MzgzMTAzMywiZXhwIjoxNzc1Mzg4NjMzfQ.8x2QWVIdrKJrYEw-zjmsDmT8DTQhYOa6LsjD4eCXwZE",
-          },
-        });
-
-        const adminData = await adminRes.json();
-        setAdmins(adminData.data);
-
-        // Fetch states
-        const stateRes = await fetch("https://api.hinduhelpline.in/api/v1/general/state/list");
-        const stateData = await stateRes.json();
-        setStates(stateData.data); // assuming response = { data: [...] }
-
-      } catch (err: any) {
-        console.error("Error:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchData = async (pageNum = 1) => {
+    try {
+      const res = await fetch(`https://api.hinduhelpline.in/api/v1/admin?page=${pageNum}&pageSize=${pageSize}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiI5NTg2Nzg0OTg5IiwiYWRtaW5JZCI6IjY3NzYxNjZjNTUxY2U4ODU1MWNlZDY0YyIsImlhdCI6MTc0MzgzMTAzMywiZXhwIjoxNzc1Mzg4NjMzfQ.8x2QWVIdrKJrYEw-zjmsDmT8DTQhYOa6LsjD4eCXwZE",
+        },
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        setAdmins((prev) => [...prev, ...data.data]);
+        setHasMore(data.data.length === pageSize); // if less than pageSize, no more data
+      } else {
+        throw new Error(data.message || "Error loading admins");
       }
-    };
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, []);
+  const loaderRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+  
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+  
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [hasMore, loading]);
+
+  
+useEffect(() => {
+  fetchData(page);
+}, [page]);
+
+  
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       // Fetch admins
+  //       const adminRes = await fetch("https://api.hinduhelpline.in/api/v1/admin", {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization:
+  //         },
+  //       });
+
+  //       const adminData = await adminRes.json();
+  //       setAdmins(adminData.data);
+
+  //       // Fetch states
+  //       const stateRes = await fetch("https://api.hinduhelpline.in/api/v1/general/state/list");
+  //       const stateData = await stateRes.json();
+  //       setStates(stateData.data); // assuming response = { data: [...] }
+
+  //     } catch (err: any) {
+  //       console.error("Error:", err);
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   // useEffect(() => {
   //   const fetchAdmins = async () => {
@@ -401,34 +456,43 @@ export default function AdminsPage() {
           </div>
         </div>
       )}
-      {loading && <p>Loading admins...</p>}
+      {/* {loading && <p>Loading admins...</p>} */}
       {error && <p className="text-red-500">{error}</p>}
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+  {admins.map((admin: any) => (
+    <div
+      key={admin._id}
+      className="p-4 bg-white rounded-lg shadow border border-gray-200 space-y-2"
+    >
+      <h2 className="text-xl font-bold">
+        {admin.firstName} {admin.lastName}
+      </h2>
+      <p className="text-sm text-gray-700">📞 {admin.mobile}</p>
+      <p className="text-sm text-gray-700">✉️ {admin.email}</p>
+      <p className="text-sm text-gray-700">
+        🌐 {admin.state?.name}, {admin.district?.name}
+      </p>
+      <p className="text-sm">
+        🧾 Responsibility: <span className="font-medium">{admin.responsibility}</span>
+      </p>
+      <p
+        className={`text-sm font-semibold ${
+          admin.isActive ? "text-green-600" : "text-red-600"
+        }`}
+      >
+        {admin.isActive ? "Active ✅" : "Inactive ❌"}
+      </p>
+    </div>
+  ))}
+</div>
 
-        {admins.map((admin: any) => (
-          <div
-            key={admin._id}
-            className="p-4 bg-white rounded-lg shadow border border-gray-200 space-y-2"
-          >
-            <h2 className="text-xl font-bold">
-              {admin.firstName} {admin.lastName}
-            </h2>
-            <p className="text-sm text-gray-700">📞 {admin.mobile}</p>
-            <p className="text-sm text-gray-700">✉️ {admin.email}</p>
-            <p className="text-sm text-gray-700">
-              🌐 {admin.state?.name}, {admin.district?.name}
-            </p>
-            <p className="text-sm">
-              🧾 Responsibility:{" "}
-              <span className="font-medium">{admin.responsibility}</span>
-            </p>
-            <p className={`text-sm font-semibold ${admin.isActive ? "text-green-600" : "text-red-600"}`}>
-              {admin.isActive ? "Active ✅" : "Inactive ❌"}
-            </p>
-          </div>
-        ))}
-      </div>
+{/* Scroll Trigger Loader */}
+<div
+  ref={loaderRef}
+  className="py-6 text-center text-sm text-gray-500"
+>
+  {loading ? "Loading more..." : hasMore ? "Scroll down to load more" : "No more admins"}
+</div>
 
     </main>
   );
