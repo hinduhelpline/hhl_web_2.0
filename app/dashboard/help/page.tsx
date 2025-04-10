@@ -9,6 +9,8 @@ export default function HelpPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedHelpId, setSelectedHelpId] = useState<string | null>(null);
   const pageSize = 10;
   const [status, setStatus] = useState(() => localStorage.getItem("helpStatus") || "asked");
 
@@ -135,18 +137,68 @@ export default function HelpPage() {
             </p>
 
             <div className="pt-2 flex justify-end">
-              <button
-                className="px-4 py-1 bg-[#f68738] text-white rounded hover:bg-[#e47520] transition"
-                onClick={() =>
-                  console.log("Review clicked for:", item._id)
-                }
-              >
-                Help Review
-              </button>
+            <button
+  className="px-4 py-1 bg-[#f68738] text-white rounded hover:bg-[#e47520] transition"
+  onClick={() => {
+    setSelectedHelpId(item._id);
+    setShowModal(true);
+  }}
+>
+  Help Review
+</button>
+
             </div>
           </div>
         ))}
       </div>
+
+      {showModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg space-y-4">
+      <h2 className="text-xl font-semibold text-gray-800">Review Help Request</h2>
+      <p>Are you sure you want to mark this help request as <strong>reviewed</strong>?</p>
+
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setShowModal(false)}
+          className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              const res = await fetch(`https://api.hinduhelpline.in/api/v1/help/status/${selectedHelpId}`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: 
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGUiOiI5NTg2Nzg0OTg5IiwiYWRtaW5JZCI6IjY3NzYxNjZjNTUxY2U4ODU1MWNlZDY0YyIsImlhdCI6MTc0MzgzMTAzMywiZXhwIjoxNzc1Mzg4NjMzfQ.8x2QWVIdrKJrYEw-zjmsDmT8DTQhYOa6LsjD4eCXwZE",
+                },
+                body: JSON.stringify({ status: "reviewed" }),
+              });
+
+              const result = await res.json();
+
+              if (!res.ok) throw new Error(result.message || "Failed to update");
+
+              alert("✅ Help marked as reviewed");
+              setShowModal(false);
+              setSelectedHelpId(null);
+              // Optional: refresh help list
+              window.location.reload(); // or trigger fetch
+            } catch (err: any) {
+              alert("❌ " + err.message);
+            }
+          }}
+          className="px-4 py-2 bg-[#f68738] text-white rounded hover:bg-[#e47520] text-sm"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Scroll Trigger for Infinite Scroll */}
       <div
