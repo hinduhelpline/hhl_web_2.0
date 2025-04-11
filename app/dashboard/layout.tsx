@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -75,10 +77,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             pathname === "/dashboard/help" ? "hover:bg-gray-100" : ""
           }`}
           onClick={() => {
-            localStorage.setItem("helpStatus", status);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("helpStatus", status);
+              router.push("/dashboard/help");
+            }
             setIsSidebarOpen(false);
-            window.location.href = "/dashboard/help";
-          }}
+          }}          
         >
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </button>

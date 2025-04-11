@@ -30,7 +30,7 @@ export default function Home() {
       if (!res.ok) {
         throw new Error(data.message || "Login failed");
       }
-      
+
       setSuccess("Login successful ✅");
       router.push("/dashboard");
       // TODO: Save token, redirect, etc.
@@ -44,7 +44,12 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-xl font-bold">Sign In</h1>
+        <h2 className="text-2xl font-bold text-[#f68738] text-center mb-2 tracking-wide">
+          Hindu Helpline
+        </h2>
+
+        <h1 className="text-xl font-bold text-center">Sign In</h1>
+
 
         <input
           type="tel"

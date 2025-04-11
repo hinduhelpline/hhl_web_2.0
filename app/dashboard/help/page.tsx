@@ -12,8 +12,15 @@ export default function HelpPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedHelpId, setSelectedHelpId] = useState<string | null>(null);
   const pageSize = 10;
-  const [status, setStatus] = useState(() => localStorage.getItem("helpStatus") || "asked");
+  const [status, setStatus] = useState("asked");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedStatus = localStorage.getItem("helpStatus");
+      if (savedStatus) setStatus(savedStatus);
+    }
+  }, []);
+  
   // "\"status\" must be one of [asked, reviewed, closed]"
   
   useEffect(() => {
