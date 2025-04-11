@@ -175,8 +175,8 @@ export default function HelpPage() {
         <button
           onClick={async () => {
             try {
-              const res = await fetch(`https://api.hinduhelpline.in/api/v1/help/status/${selectedHelpId}`, {
-                method: "PUT",
+              const res = await fetch(`https://api.hinduhelpline.in/api/v1/admin/help/status/${selectedHelpId}`, {
+                method: "PATCH",
                 headers: {
                   "Content-Type": "application/json",
                   Authorization: 
