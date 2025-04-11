@@ -12,15 +12,27 @@ export default function HelpPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedHelpId, setSelectedHelpId] = useState<string | null>(null);
   const pageSize = 10;
-  const [status, setStatus] = useState("asked");
-
-  useEffect(() => {
+  const [status, setStatus] = useState(() => {
     if (typeof window !== "undefined") {
-      const savedStatus = localStorage.getItem("helpStatus");
-      if (savedStatus) setStatus(savedStatus);
+      return localStorage.getItem("helpStatus") || "asked";
     }
-  }, []);
+    return "asked"; // fallback for SSR build
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
   
+    const interval = setInterval(() => {
+      const latest = localStorage.getItem("helpStatus");
+      if (latest && latest !== status) {
+        setStatus(latest);
+        setPage(1);
+        setHelpList([]);
+      }
+    }, 300);
+  
+    return () => clearInterval(interval);
+  }, [status]);
+    
   // "\"status\" must be one of [asked, reviewed, closed]"
   
   useEffect(() => {
